@@ -4,6 +4,7 @@
 
 from fastapi import APIRouter
 from app.core.post_repository import PostRepository 
+from app.core.post import Post
 from .schemas.post_schema import PostCreate, PostResponse
 from app.infra.mongo_post_repository import MongoPostRepository
 
@@ -11,9 +12,9 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 post_repository = MongoPostRepository()
 
 @router.post("/", response_model = PostResponse)
-async def create(post: PostCreate):
-    post_data = post.model_dump(by_alias = False)
-    post_id = post_repository.save(post_data)
+async def create(post_create: PostCreate):
+    post = Post(**post_create.model_dump())
+    post_id = post_repository.save(post)
     post_doc = post_repository.get(post_id)
     return PostResponse.model_validate(post_doc)
 

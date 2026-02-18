@@ -8,16 +8,21 @@ class Post:
         title: str,
         content: str,
         author_name: str,
-        tags: List[str] | None = None,
+        tags: list[str] | None = None,
+        id: str | None = None,
+        views: int = 0,
+        comments: list | None = None,
+        created_at: datetime | None = None,
+        updated_at: datetime | None = None,
     ):
+        self.id = id   # Domain id 永远是 string
         self.title = title
         self.content = content
-        self.author = {
-            "name": author_name
-        }
+        self.author_name = author_name
         self.tags = tags or []
-        self.views = 0
-        self.comments = []
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
+        self.views = views
+        self.comments = comments or []
+        self.created_at = created_at or datetime.now()
+        self.updated_at = updated_at or datetime.now()
 
+    
