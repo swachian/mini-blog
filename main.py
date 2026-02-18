@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from app.api import post_api
+from app.controller import post_controller
 
 app = FastAPI()
 
-app.include_router(post_api.router)
+app.include_router(post_controller.router)
 
