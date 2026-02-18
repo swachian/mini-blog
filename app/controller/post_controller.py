@@ -14,11 +14,16 @@ post_repository = MongoPostRepository()
 @router.post("/", response_model = PostResponse)
 async def create(post_create: PostCreate):
     post = Post(**post_create.model_dump())
-    post_id = post_repository.save(post)
-    post_doc = post_repository.get(post_id)
-    return PostResponse.model_validate(post_doc)
+    post_id = await post_repository.save(post)
+    post = await post_repository.get(post_id)
+    return PostResponse.model_validate(post)
 
 @router.get("/", response_model=list[PostResponse])
 async def get():
-    results = post_repository.list()
+    results = await post_repository.list()
     return [PostResponse.model_validate(post) for post in results]
+
+@router.get("/{id}", response_model = PostResponse)
+async def show_students(id: str):
+    post = await post_repository.get(id)
+    return PostResponse.model_validate(post)

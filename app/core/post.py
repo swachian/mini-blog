@@ -10,12 +10,13 @@ class Post:
         author_name: str,
         tags: list[str] | None = None,
         id: str | None = None,
+        _id: str | None = None,
         views: int = 0,
         comments: list | None = None,
         created_at: datetime | None = None,
         updated_at: datetime | None = None,
     ):
-        self.id = id   # Domain id 永远是 string
+        self.id = id or _id  # Domain id 永远是 string
         self.title = title
         self.content = content
         self.author_name = author_name

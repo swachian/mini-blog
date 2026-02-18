@@ -1,5 +1,5 @@
 
-from pymongo import MongoClient
+from pymongo import AsyncMongoClient
 
 class MongoClientProvider:
     _client = None
@@ -8,7 +8,7 @@ class MongoClientProvider:
     @classmethod
     def get_client(cls):
         if cls._client is None:
-            cls._client =  MongoClient(cls.uri, maxPoolSize = 50, minPoolSize = 5)
+            cls._client =  AsyncMongoClient(cls.uri, maxPoolSize = 50, minPoolSize = 5)
         return cls._client
             
     @classmethod

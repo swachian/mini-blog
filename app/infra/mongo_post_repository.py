@@ -10,18 +10,20 @@ class MongoPostRepository(PostRepository):
         self.posts = MongoClientProvider.get_db()["posts"]
         
     
-    def save(self, post: dict | Post) -> str:
-        result = self.posts.insert_one(self._to_dict(post))
+    async def save(self, post: dict | Post) -> str:
+        result = await self.posts.insert_one(self._to_dict(post))
         return str(result.inserted_id)
     
-    def get(self, post_id: str):
-        return self.posts.find_one({"_id": ObjectId(post_id)})
+    async def get(self, post_id: str) -> Post:
+        doc = await self.posts.find_one({"_id": ObjectId(post_id)})
+        return Post(**doc)
     
-    def list(self) -> list[Post]:
-        return self.posts.find()
+    async def list(self) -> list[Post]:
+        docs = await self.posts.find().to_list()
+        return [Post(**doc) for doc in docs]
     
     
-    def _from_dict(self, doc: dict) -> "Post":
+    def _from_dict(self, doc: dict) -> Post:
         return Post(
             id = str(doc["_id"]),
             title = doc["title"],
