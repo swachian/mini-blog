@@ -11,8 +11,12 @@ class MongoPostRepository(PostRepository):
         
     
     async def save(self, post: dict | Post) -> str:
-        result = await self.posts.insert_one(self._to_dict(post))
-        return str(result.inserted_id)
+        if not post.id:
+            result = await self.posts.insert_one(self._to_dict(post))
+            return str(result.inserted_id)
+        else:
+            await self.posts.update_one({"_id": post.id}, {"$set": self._to_dict(post)})
+            return post.id
     
     async def get(self, post_id: str) -> Post:
         doc = await self.posts.find_one({"_id": ObjectId(post_id)})
@@ -21,6 +25,10 @@ class MongoPostRepository(PostRepository):
     async def list(self) -> list[Post]:
         docs = await self.posts.find().to_list()
         return [Post(**doc) for doc in docs]
+    
+    async def delete(self, id: str) -> int:
+        delete_result = await self.posts.delete_one({"_id": ObjectId(id)})
+        return delete_result.deleted_count
     
     
     def _from_dict(self, doc: dict) -> Post:

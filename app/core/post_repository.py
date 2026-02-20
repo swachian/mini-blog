@@ -11,3 +11,6 @@ class PostRepository:
     def list(self) -> list[Post]:
         pass
     
+    def delete(self, id: str) -> int:
+        pass
+    

@@ -3,7 +3,7 @@ from pydantic import Field
 from .base import CamelModel, PyObjectId
 
 
-class PostCreate(CamelModel):
+class PostDto(CamelModel):
     title: str
     content: str
     author_name: str
