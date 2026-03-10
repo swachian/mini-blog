@@ -1,6 +1,8 @@
 from .mongodb_provider import MongoClientProvider
 from app.core.post_repository import PostRepository
 from app.core.post import Post
+from app.controller.schemas.base import SearchFilter, SearchRequest, SearchResponse
+from app.controller.query_builder import QueryBuilder
 from datetime import datetime
 from bson import ObjectId
 
@@ -22,8 +24,11 @@ class MongoPostRepository(PostRepository):
         doc = await self.posts.find_one({"_id": ObjectId(post_id)})
         return Post(**doc)
     
-    async def list(self) -> list[Post]:
-        docs = await self.posts.find().to_list()
+    async def list(self, searchReq: SearchRequest | None) -> list[Post]:
+        if not searchReq:
+            searchReq = SearchRequest() 
+        query = QueryBuilder.build_filter_query(searchReq.filters)
+        docs = await self.posts.find(query).skip((searchReq.page - 1) * searchReq.page_size).limit(searchReq.page_size).to_list()
         return [Post(**doc) for doc in docs]
     
     async def delete(self, id: str) -> int:

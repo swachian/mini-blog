@@ -15,14 +15,18 @@ class QueryBuilder:
         "regex": "$regex",
         "contains": "$regex",  # 模糊查询
     }
-    
+
+    def camel_to_snake(name: str) -> str:
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
     @classmethod
     def build_filter_query(cls, filters: List[SearchFilter]) -> Dict[str, Any]:
         """构建MongoDB查询过滤器"""
         query = {}
         
         for filter_item in filters:
-            field = filter_item.field
+            field = cls.camel_to_snake(filter_item.field)
             operator = filter_item.operator
             value = filter_item.value
             

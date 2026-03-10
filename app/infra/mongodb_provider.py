@@ -3,7 +3,7 @@ from pymongo import AsyncMongoClient
 
 class MongoClientProvider:
     _client = None
-    uri = "mongodb://admin:admin123@localhost:27017"
+    uri = "mongodb://localhost:27017"
     
     @classmethod
     def get_client(cls):
