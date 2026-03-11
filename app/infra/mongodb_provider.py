@@ -3,8 +3,8 @@ from pymongo import AsyncMongoClient
 
 class MongoClientProvider:
     _client = None
-    uri = "mongodb://localhost:27017"
-    
+    uri = "mongodb://localhost:27017/?replicaSet=rs0"
+
     @classmethod
     def get_client(cls):
         if cls._client is None:
