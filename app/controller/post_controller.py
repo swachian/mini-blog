@@ -8,6 +8,7 @@ from app.core.post import Post
 from .schemas.post_schema import PostDto, PostResponse
 from .schemas.base import SearchRequest, SearchResponse, SearchFilter
 from app.infra.mongo_post_repository import MongoPostRepository
+from app.infra.es_provider import EsProvider
 import json
 
 router = APIRouter(prefix="/posts", tags=["posts"])
@@ -49,6 +50,39 @@ def parse_search_request(
         projection=proj,
     )
     
+@router.get("/search")
+async def search(keyword: str = Query(..., min_length=1)):
+    query = {
+        "query": {
+            "multi_match": {
+                "query": keyword,
+                "analyzer": "ik_max_word",
+                "fields": [
+                    "title",
+                    "content",
+                    "tags",
+                    "author_name"
+                ]
+            }
+        }
+    }
+
+    es = EsProvider.get_es()
+    resp = await es.search(index="mini_blog_posts", body=query)
+
+    hits = [
+        {
+            "id": hit["_id"],
+            **hit["_source"]
+        }
+        for hit in resp["hits"]["hits"]
+    ]
+
+    return {
+        "total": resp["hits"]["total"]["value"],
+        "results": hits
+    }
+
 @router.get("/", response_model=list[PostResponse])
 async def list_posts(
     searchReq: SearchRequest = Depends(parse_search_request)
