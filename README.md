@@ -262,29 +262,43 @@ curl -X PUT "localhost:9200/mini_blog_posts" -H 'Content-Type: application/json'
 curl -X DELETE http://localhost:8083/connectors/es-posts-sink
 
 curl -X POST http://localhost:8083/connectors \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "es-posts-sink",
-    "config": {
-      "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-      "tasks.max": "1",
-      "topics": "mini_blog_posts",
-      "connection.url": "http://elasticsearch:9200",
-      "key.ignore": "true",
-      "schema.ignore": "true",
-      "behavior.on.null.values": "delete",
-      
-      "transforms": "unwrap,extractAfter",
-      "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
-      "transforms.unwrap.drop.tombstones": "true",
-      
-      "transforms.extractAfter.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
-      "transforms.extractAfter.field": "after",
-      
-      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-      "value.converter.schemas.enable": "false"
-    }
-  }'
+-H "Content-Type: application/json" \
+-d '{
+  "name": "es-mini-blog-sink",
+  "config": {
+
+    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+    "tasks.max": "1",
+
+    "topics": "mini_blog_posts",
+
+    "connection.url": "http://elasticsearch:9200",
+
+    "schema.ignore": "true",
+
+    "key.ignore": "false",
+
+    "write.method": "upsert",
+
+    "behavior.on.null.values": "delete",
+
+    "transforms": "createKey,extractId,dropId",
+
+    "transforms.createKey.type": "org.apache.kafka.connect.transforms.ValueToKey",
+    "transforms.createKey.fields": "_id",
+
+    "transforms.extractId.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+    "transforms.extractId.field": "_id",
+
+    "transforms.dropId.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+    "transforms.dropId.blacklist": "_id",
+
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter"
+  }
+}'
 ```
 
 有一个坑的地方，kafka的es sink 15.xx目前也仅能支持es 8.x。如果使用9.x的版本，sink就会报400错误。
